@@ -28,4 +28,5 @@ $failed = $false
 try { & $wrapper check }
 catch { $failed = $true }
 if (-not $failed -or $global:TestDockerCalls.Count -ne 6) { throw 'Docker failures must stop immediately' }
+$global:LASTEXITCODE = 0
 Write-Output 'PowerShell command tests passed.'

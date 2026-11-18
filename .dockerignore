@@ -10,6 +10,7 @@
 .env.*
 !.env.example
 .scrapy
+playwright/.auth/
 data/*
 !data/.gitkeep
 *.log
