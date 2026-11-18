@@ -172,6 +172,18 @@ indétectable**. L'identité HTTP par défaut est explicite. Aucun proxy payant,
 rotation d'IP, spoofing de fingerprint ou résolveur de CAPTCHA n'est nécessaire.
 Le [guide de scraping](docs/scraping.md) détaille les limites et l'adaptation à un site.
 
+## Contribuer
+
+La branche `main` est protégée : les modifications passent par une pull request.
+Le contrôle GitHub Actions `container` doit réussir et la branche doit être à jour
+avec `main` avant fusion. Les conversations de revue doivent être résolues.
+Ces règles s'appliquent également aux administrateurs ; les push forcés et la
+suppression de `main` sont interdits.
+
+Le dépôt ayant actuellement un seul contributeur, aucune approbation d'une seconde
+personne n'est exigée. Les contrôles s'exécutent aussi pour les changements limités
+à la documentation afin de ne pas bloquer leur fusion.
+
 ## Structure
 
 ```text
