@@ -109,3 +109,42 @@ pas été modifiées. Aucune collecte complète ni aucun téléchargement d'imag
 lancé. Les tests automatisés utilisent uniquement des serveurs locaux. Le cache
 optionnel de pytest est désactivé pour ces vérifications Docker, car le dossier de
 cache préexistant sous Windows n'est pas accessible en écriture à l'utilisateur du conteneur.
+
+## Ajout du spider pokemon_id
+
+Source : catalogue indonésien de TCG Collector, vérifié le 18 novembre 2026.
+
+- Robots.txt interdit la pagination et `/api/`. L'index public donne trois sitemaps
+  de cartes ID : 5 000 + 5 000 + 4 004 entrées, 14 004 IDs uniques sur l'origine
+  attendue, correspondant au compteur de recherche. Les liens ont tous été validés
+  hors ligne ; seule une poignée de fiches a été téléchargée.
+- Essai réel dans Docker : **3 cartes**, sept réponses HTTP 200 (deux robots.txt,
+  index, sitemap ID1 et trois fiches), fermeture `finished` en **27,26 secondes**.
+  IDs, langue/région, illustrateurs et exclusion des images génériques vérifiés.
+- Navigation manuelle vérifiée pour Fiery Flint 221/183 : le dos `default-card-image`
+  est bien une image de remplacement du site, également visible depuis la recherche.
+- Premier passage Docker : **128 tests réussis en 188,51 secondes**.
+- Revue indépendante : quatre corrections avec régressions reproduites avant
+  correction : structure `provided_energy`, structure commune `text_blocks`,
+  attaque gratuite sans zone énergie et compatibilité des paramètres positionnels
+  PowerShell. Les contrats unitaires indonésiens passent désormais au nombre de 30,
+  en plus des huit parcours HTTP locaux (limites, erreurs, blocages et deux reprises).
+- Après corrections, parsing vérifié sur cinq fiches réelles conservées en scratch :
+  [Exeggcute 89967](https://www.tcgcollector.com/cards/89967/exeggcute-30th-celebration-001-130),
+  [Fiery Flint 80454](https://www.tcgcollector.com/cards/80454/fiery-flint-hidden-shadow-set-a-221-183),
+  [Greninja-GX 80456](https://www.tcgcollector.com/cards/80456/greninja-gx-hidden-shadow-set-a-212-183),
+  [Water Energy 75496](https://www.tcgcollector.com/cards/75496/water-energy-silver-lance-095-070)
+  et [Alolan Rattata 79650](https://www.tcgcollector.com/cards/79650/alolan-rattata-sky-ruler-set-a-106-178).
+  Les coûts gratuits et payants, rectos réels, champs partagés et types d'énergie
+  fournis ont été contrôlés sur ces réponses.
+- Ruff (`check` et `format --check`) et les tests PowerShell passent.
+- Vérification finale après toutes les corrections : **133 tests réussis dans Docker
+  en 156,54 secondes**, incluant les spiders japonais/coréen et les parcours Chromium.
+
+Les limites de la source sont décrites dans [le guide indonésien](pokemon-id.md) :
+textes anglais, texte d'ambiance non fourni dans les fiches examinées, finitions
+regroupées par fiche, images parfois manquantes. Le tri est celui des sitemaps.
+La reprise après arrêt brutal n'est pas garantie ; les tests vérifient l'arrêt propre.
+Les fichiers de travail restent dans `.tools/pokemon-id`. Aucune collecte complète,
+aucun téléchargement d'image et aucune modification des exports JP/KR n'ont eu lieu.
+Ces résultats concernent les vérifications locales effectuées avant publication sur GitHub.

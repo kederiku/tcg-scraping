@@ -3,9 +3,10 @@ DC := docker compose
 RUN := $(DC) run --rm crawler
 SPIDER ?= quotes
 MAX_PAGES ?= 3
+MAX_CARDS ?= 5
 ARGS ?=
 
-.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all test lint format shell check
+.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all test lint format shell check
 
 help:
 	@echo "make build      - Construire l'image et installer Chromium"
@@ -16,12 +17,14 @@ help:
 	@echo "make pokemon-all - Catalogue Pokemon complet, avec reprise"
 	@echo "make pokemon-kr - Echantillon Pokemon coreen (MAX_PAGES=3)"
 	@echo "make pokemon-kr-all - Catalogue coreen complet, avec reprise"
+	@echo "make pokemon-id - Echantillon indonesien (MAX_CARDS=5)"
+	@echo "make pokemon-id-all - Catalogue indonesien complet, avec reprise"
 	@echo "make test       - Tests locaux HTTP et Chromium"
 	@echo "make lint       - Ruff et verification du format"
 	@echo "make format     - Formater le code Python"
 	@echo "make shell      - Shell dans le conteneur"
 	@echo "make check      - Lint puis tests"
-	@echo "Options : SPIDER=quotes MAX_PAGES=3 ARGS='-s LOG_LEVEL=DEBUG'"
+	@echo "Options : SPIDER=quotes MAX_PAGES=3 MAX_CARDS=5 ARGS='-s LOG_LEVEL=DEBUG'"
 
 build:
 	$(DC) build --pull
@@ -30,10 +33,10 @@ list:
 	$(RUN) scrapy list
 
 crawl:
-	$(RUN) scrapy crawl $(SPIDER) -a max_pages=$(MAX_PAGES) -O $(if $(filter pokemon_jp pokemon_kr,$(SPIDER)),data/$(SPIDER)-sample.jsonl,data/$(SPIDER).jsonl) $(ARGS)
+	$(RUN) scrapy crawl $(SPIDER) -a $(if $(filter pokemon_id,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O $(if $(filter pokemon_jp pokemon_kr pokemon_id,$(SPIDER)),data/$(SPIDER)-sample.jsonl,data/$(SPIDER).jsonl) $(ARGS)
 
 crawl-js:
-	$(RUN) scrapy crawl $(SPIDER) -a javascript=true -a max_pages=$(MAX_PAGES) -O data/$(SPIDER)-js.jsonl $(ARGS)
+	$(RUN) scrapy crawl $(SPIDER) -a javascript=true -a $(if $(filter pokemon_id,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O data/$(SPIDER)-js.jsonl $(ARGS)
 
 pokemon:
 	$(RUN) scrapy crawl pokemon_jp -a max_pages=$(MAX_PAGES) -O data/pokemon_jp-sample.jsonl $(ARGS)
@@ -46,6 +49,12 @@ pokemon-kr:
 
 pokemon-kr-all:
 	$(RUN) scrapy crawl pokemon_kr -a max_pages=0 -s JOBDIR=data/jobs/pokemon_kr -o data/pokemon_kr.jsonl $(ARGS)
+
+pokemon-id:
+	$(RUN) scrapy crawl pokemon_id -a max_cards=$(MAX_CARDS) -O data/pokemon_id-sample.jsonl $(ARGS)
+
+pokemon-id-all:
+	$(RUN) scrapy crawl pokemon_id -a max_cards=0 -s JOBDIR=data/jobs/pokemon_id -o data/pokemon_id.jsonl $(ARGS)
 
 test:
 	$(RUN) pytest -q

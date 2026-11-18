@@ -9,6 +9,8 @@ Le spider [`pokemon_jp`](docs/pokemon-jp.md) parcourt le catalogue officiel
 japonais Pokémon : pagination, fiches de détail et export des caractéristiques.
 Le spider [`pokemon_kr`](docs/pokemon-kr.md) fait de même pour le catalogue coréen,
 en reproduisant les requêtes Recherche et « Charger plus » du site.
+Le spider [`pokemon_id`](docs/pokemon-id.md) collecte les fiches indonésiennes
+de TCG Collector à partir de ses sitemaps publics autorisés.
 
 Le modèle [`ItemPokemon`](docs/item-pokemon.md) sert aux
 spiders de cartes : Pokémon, Dresseurs et Énergies, caractéristiques d'impression,
@@ -65,6 +67,8 @@ make crawl ARGS='-s LOG_LEVEL=DEBUG'
 | `pokemon-all` | Catalogue Pokémon complet, export cumulatif et reprise |
 | `pokemon-kr` | Échantillon coréen, 3 lots par défaut |
 | `pokemon-kr-all` | Catalogue coréen complet, export cumulatif et reprise |
+| `pokemon-id` | Échantillon indonésien, 5 cartes par défaut |
+| `pokemon-id-all` | Catalogue indonésien complet, export cumulatif et reprise |
 | `test` | Tester HTTP et Chromium sur un serveur local |
 | `lint` | Vérifier Ruff et le formatage |
 | `format` | Formater le Python |
@@ -118,6 +122,23 @@ requêtes HTTP publiques suffisent au spider : aucun navigateur n'est nécessair
 `make pokemon-kr-all`. L'export complet est `data/pokemon_kr.jsonl`, avec son propre
 état de reprise `data/jobs/pokemon_kr`. Voir le [guide coréen](docs/pokemon-kr.md).
 
+## Cartes Pokémon indonésiennes
+
+```powershell
+# Cinq fiches dans data/pokemon_id-sample.jsonl.
+.\make.ps1 pokemon-id
+
+# Catalogue complet dans data/pokemon_id.jsonl, avec reprise.
+.\make.ps1 pokemon-id-all
+```
+
+Équivalents Make : `make pokemon-id MAX_CARDS=5` et `make pokemon-id-all`.
+TCG Collector interdit la pagination dans son robots.txt : le spider découvre
+les fiches via ses sitemaps ID. Les textes du catalogue sont en anglais, même
+pour les cartes indonésiennes ; le texte d'ambiance n'est pas fourni dans les
+fiches examinées. Les dos génériques sont exclus des URLs de recto.
+Voir le [guide indonésien](docs/pokemon-id.md) pour les champs, limites et commandes Docker.
+
 ## Configuration
 
 Copie `.env.example` vers `.env` uniquement si tu souhaites modifier les valeurs.
@@ -160,6 +181,7 @@ tcg_scraper/middlewares.py    Identité HTTP, cache, arrêt sur blocage
 tcg_scraper/spiders/quotes.py Exemple et pagination
 tcg_scraper/spiders/pokemon_jp.py Catalogue Pokémon japonais et fiches
 tcg_scraper/spiders/pokemon_kr.py Catalogue coréen, recherche AJAX et fiches
+tcg_scraper/spiders/pokemon_id.py Catalogue indonésien, sitemaps et fiches
 tests/                       Tests locaux HTTP, Chromium et commandes Windows
 docker/                      Profil seccomp et licence amont
 data/                        Exports non versionnés
