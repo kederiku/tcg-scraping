@@ -1,12 +1,11 @@
 name: Container checks
 
 on:
+  # This required check must also run for documentation-only changes.
   push:
     branches: [main]
-    paths-ignore: ['docs/**', 'README.md']
   pull_request:
     branches: [main]
-    paths-ignore: ['docs/**', 'README.md']
   workflow_dispatch:
 
 permissions:
