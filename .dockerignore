@@ -1,0 +1,15 @@
+.git
+.venv*
+.tools
+.superpowers
+.pytest_cache
+.ruff_cache
+**/__pycache__
+*.pyc
+.env
+.env.*
+!.env.example
+.scrapy
+data/*
+!data/.gitkeep
+*.log
