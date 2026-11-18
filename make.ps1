@@ -1,6 +1,6 @@
 param(
     [ValidateSet('help', 'build', 'list', 'crawl', 'crawl-js', 'pokemon', 'pokemon-all',
-        'test', 'lint', 'format', 'shell', 'check')]
+        'pokemon-kr', 'pokemon-kr-all', 'test', 'lint', 'format', 'shell', 'check')]
     [string]$Target = 'help',
     [string]$Spider = 'quotes',
     [ValidateRange(1, 2147483647)]
@@ -32,11 +32,13 @@ try {
             Write-Output '.\make.ps1 crawl -ExtraArgs @("-s", "LOG_LEVEL=DEBUG")'
             Write-Output '.\make.ps1 pokemon -MaxPages 1 -ExtraArgs @("-a", "max_cards=5")'
             Write-Output '.\make.ps1 pokemon-all  # Catalogue complet, avec reprise'
+            Write-Output '.\make.ps1 pokemon-kr -MaxPages 1 -ExtraArgs @("-a", "max_cards=5")'
+            Write-Output '.\make.ps1 pokemon-kr-all  # Catalogue coreen complet, avec reprise'
         }
         'build' { Invoke-Docker @('compose', 'build', '--pull') }
         'list' { Invoke-Docker ($run + @('scrapy', 'list')) }
         'crawl' {
-            $output = if ($Spider -eq 'pokemon_jp') { 'data/pokemon_jp-sample.jsonl' }
+            $output = if ($Spider -in @('pokemon_jp', 'pokemon_kr')) { "data/$Spider-sample.jsonl" }
                 else { "data/$Spider.jsonl" }
             Invoke-Docker ($run + @('scrapy', 'crawl', $Spider, '-a', "max_pages=$MaxPages",
                 '-O', $output) + $ExtraArgs)
@@ -52,6 +54,14 @@ try {
         'pokemon-all' {
             Invoke-Docker ($run + @('scrapy', 'crawl', 'pokemon_jp', '-a', 'max_pages=0',
                 '-s', 'JOBDIR=data/jobs/pokemon_jp', '-o', 'data/pokemon_jp.jsonl') + $ExtraArgs)
+        }
+        'pokemon-kr' {
+            Invoke-Docker ($run + @('scrapy', 'crawl', 'pokemon_kr', '-a', "max_pages=$MaxPages",
+                '-O', 'data/pokemon_kr-sample.jsonl') + $ExtraArgs)
+        }
+        'pokemon-kr-all' {
+            Invoke-Docker ($run + @('scrapy', 'crawl', 'pokemon_kr', '-a', 'max_pages=0',
+                '-s', 'JOBDIR=data/jobs/pokemon_kr', '-o', 'data/pokemon_kr.jsonl') + $ExtraArgs)
         }
         'test' { Invoke-Docker ($run + @('pytest', '-q')) }
         'lint' { Invoke-Lint }

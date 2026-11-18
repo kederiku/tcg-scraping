@@ -7,6 +7,8 @@ crawl prudents, des tests et des commandes courtes.
 Le spider `quotes` utilise un site prévu pour apprendre le scraping.
 Le spider [`pokemon_jp`](docs/pokemon-jp.md) parcourt le catalogue officiel
 japonais Pokémon : pagination, fiches de détail et export des caractéristiques.
+Le spider [`pokemon_kr`](docs/pokemon-kr.md) fait de même pour le catalogue coréen,
+en reproduisant les requêtes Recherche et « Charger plus » du site.
 
 Le modèle [`ItemPokemon`](docs/item-pokemon.md) sert aux
 spiders de cartes : Pokémon, Dresseurs et Énergies, caractéristiques d'impression,
@@ -61,6 +63,8 @@ make crawl ARGS='-s LOG_LEVEL=DEBUG'
 | `crawl-js` | Lancer l'exemple avec Chromium |
 | `pokemon` | Échantillon Pokémon japonais, 3 pages par défaut |
 | `pokemon-all` | Catalogue Pokémon complet, export cumulatif et reprise |
+| `pokemon-kr` | Échantillon coréen, 3 lots par défaut |
+| `pokemon-kr-all` | Catalogue coréen complet, export cumulatif et reprise |
 | `test` | Tester HTTP et Chromium sur un serveur local |
 | `lint` | Vérifier Ruff et le formatage |
 | `format` | Formater le Python |
@@ -96,6 +100,23 @@ de reprendre les requêtes en attente. Le catalogue comporte des dizaines de
 milliers de fiches : prévoir plusieurs heures avec les délais actuels.
 Les [options, champs collectés et limites de reprise](docs/pokemon-jp.md)
 sont détaillés dans le guide.
+
+## Cartes Pokémon coréennes
+
+Le bouton Recherche et la pagination du site utilisent JavaScript, mais leurs
+requêtes HTTP publiques suffisent au spider : aucun navigateur n'est nécessaire.
+
+```powershell
+# Petit essai : cinq cartes au maximum.
+.\make.ps1 pokemon-kr -MaxPages 1 -ExtraArgs @('-a', 'max_cards=5')
+
+# Toutes les cartes, avec reprise.
+.\make.ps1 pokemon-kr-all
+```
+
+Équivalents Make : `make pokemon-kr MAX_PAGES=1 ARGS='-a max_cards=5'` et
+`make pokemon-kr-all`. L'export complet est `data/pokemon_kr.jsonl`, avec son propre
+état de reprise `data/jobs/pokemon_kr`. Voir le [guide coréen](docs/pokemon-kr.md).
 
 ## Configuration
 
@@ -138,6 +159,7 @@ tcg_scraper/item_pokemon.py   Schéma des caractéristiques de cartes Pokémon
 tcg_scraper/middlewares.py    Identité HTTP, cache, arrêt sur blocage
 tcg_scraper/spiders/quotes.py Exemple et pagination
 tcg_scraper/spiders/pokemon_jp.py Catalogue Pokémon japonais et fiches
+tcg_scraper/spiders/pokemon_kr.py Catalogue coréen, recherche AJAX et fiches
 tests/                       Tests locaux HTTP, Chromium et commandes Windows
 docker/                      Profil seccomp et licence amont
 data/                        Exports non versionnés
