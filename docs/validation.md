@@ -9,6 +9,26 @@
 - `docker compose config --quiet` : configuration valide.
 - Aucun crawl de marchand ou de site tiers n'a été lancé pendant ces tests.
 
+## Conteneur Linux validé
+
+La [CI GitHub Actions](https://github.com/kederiku/tcg-scraping/actions/runs/44276131348)
+s'est terminée avec succès sur le commit
+`b6ca61068c22c7c2abd0dc6f50eb465aaa29b66a` :
+
+- Construction de l'image Python 3.13 avec Chromium : succès.
+- Ruff et formatage exécutés dans le conteneur : succès.
+- **13 tests HTTP/Chromium dans le conteneur : succès en 19,91 secondes.**
+- Wrapper PowerShell : succès sous le shell utilisé par GitHub Actions.
+- Chromium lancé sans root avec `chromium_sandbox=True` et le profil seccomp fourni.
+
+Le premier build a révélé l'absence de `libatomic1` dans l'image Python minimale.
+Le Dockerfile installe désormais cette bibliothèque avant de lancer l'installateur
+de navigateurs Playwright. Le second build et toute la suite sont passés.
+
+Une revue indépendante a également fait corriger l'exclusion des fichiers
+`playwright/.auth/` du contexte Docker et le code de sortie du test PowerShell.
+Elle n'a laissé aucun défaut critique ou important ouvert.
+
 ## Hôte
 
 Windows, Python 3.13.18, Chromium installé par Playwright 1.65.2.
@@ -22,7 +42,7 @@ L'environnement Python utilisé pour la suite finale a été réinstallé depuis
 paquets officiels après qu'un premier passage de Ruff a parcouru des outils
 temporaires. Ces dossiers sont désormais explicitement exclus du lint et de Git.
 
-## Validation Docker à effectuer après redémarrage
+## Lancement local après redémarrage
 
 ```powershell
 .\make.ps1 build
@@ -31,5 +51,5 @@ temporaires. Ces dossiers sont désormais explicitement exclus du lint et de Git
 .\make.ps1 crawl-js
 ```
 
-Le build Linux et l'exécution dans le conteneur ne sont pas validés tant que
-Docker Desktop n'a pas démarré. Les tests Windows ne remplacent pas cette vérification.
+Le build Linux et l'exécution du conteneur sont validés par la CI ci-dessus.
+Le lancement sur ce PC Windows reste à effectuer après son redémarrage.
