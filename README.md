@@ -4,8 +4,13 @@ Socle gratuit **Scrapy + scrapy-playwright + Chromium**, exécuté dans un
 conteneur Linux. Il fournit un exemple HTTP et JavaScript, des réglages de
 crawl prudents, des tests et des commandes courtes.
 
-Ce dépôt est un point de départ : le spider `quotes` utilise un site prévu
-pour apprendre le scraping. Aucun marchand TCG n'est encore intégré.
+Le spider `quotes` utilise un site prévu pour apprendre le scraping.
+Le spider [`pokemon_jp`](docs/pokemon-jp.md) parcourt le catalogue officiel
+japonais Pokémon : pagination, fiches de détail et export des caractéristiques.
+
+Le modèle [`ItemPokemon`](docs/item-pokemon.md) sert aux
+spiders de cartes : Pokémon, Dresseurs et Énergies, caractéristiques d'impression,
+attaques, talents, variantes et formats anciens ou multiparties.
 
 ## Démarrer
 
@@ -54,6 +59,8 @@ make crawl ARGS='-s LOG_LEVEL=DEBUG'
 | `list` | Lister les spiders disponibles |
 | `crawl` | Lancer l'exemple HTTP |
 | `crawl-js` | Lancer l'exemple avec Chromium |
+| `pokemon` | Échantillon Pokémon japonais, 3 pages par défaut |
+| `pokemon-all` | Catalogue Pokémon complet, export cumulatif et reprise |
 | `test` | Tester HTTP et Chromium sur un serveur local |
 | `lint` | Vérifier Ruff et le formatage |
 | `format` | Formater le Python |
@@ -69,6 +76,26 @@ docker compose run --rm crawler scrapy crawl quotes -a max_pages=3 -O data/quote
 docker compose run --rm crawler scrapy crawl quotes -a javascript=true -O data/quotes-js.jsonl
 docker compose run --rm crawler pytest -q
 ```
+
+## Cartes Pokémon japonaises
+
+Petit essai, limité à cinq fiches :
+
+```powershell
+.\make.ps1 pokemon -MaxPages 1 -ExtraArgs @('-a', 'max_cards=5')
+```
+
+```sh
+make pokemon MAX_PAGES=1 ARGS='-a max_cards=5'
+```
+
+Pour toutes les pages et toutes les fiches, lancer `make pokemon-all` ou
+`.\make.ps1 pokemon-all`. Le résultat s'ajoute à `data/pokemon_jp.jsonl`.
+Un arrêt propre avec **Ctrl+C une seule fois**, puis la même commande, permet
+de reprendre les requêtes en attente. Le catalogue comporte des dizaines de
+milliers de fiches : prévoir plusieurs heures avec les délais actuels.
+Les [options, champs collectés et limites de reprise](docs/pokemon-jp.md)
+sont détaillés dans le guide.
 
 ## Configuration
 
@@ -107,8 +134,10 @@ Le [guide de scraping](docs/scraping.md) détaille les limites et l'adaptation �
 
 ```text
 tcg_scraper/settings.py       Réglages et intégration Playwright
+tcg_scraper/item_pokemon.py   Schéma des caractéristiques de cartes Pokémon
 tcg_scraper/middlewares.py    Identité HTTP, cache, arrêt sur blocage
 tcg_scraper/spiders/quotes.py Exemple et pagination
+tcg_scraper/spiders/pokemon_jp.py Catalogue Pokémon japonais et fiches
 tests/                       Tests locaux HTTP, Chromium et commandes Windows
 docker/                      Profil seccomp et licence amont
 data/                        Exports non versionnés

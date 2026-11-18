@@ -23,10 +23,19 @@ Assert-Call 1 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'quotes'
     '-a', 'javascript=true', '-a', 'max_pages=2', '-O', 'data/quotes-js.jsonl', '-s', 'LOG_LEVEL=DEBUG')
 & $wrapper check
 if ($global:TestDockerCalls.Count -ne 5) { throw 'check must call lint, format-check and tests' }
+& $wrapper pokemon -MaxPages 1 -ExtraArgs @('-a', 'max_cards=5')
+Assert-Call 5 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'pokemon_jp',
+    '-a', 'max_pages=1', '-O', 'data/pokemon_jp-sample.jsonl', '-a', 'max_cards=5')
+& $wrapper pokemon-all
+Assert-Call 6 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'pokemon_jp',
+    '-a', 'max_pages=0', '-s', 'JOBDIR=data/jobs/pokemon_jp', '-o', 'data/pokemon_jp.jsonl')
+& $wrapper crawl -Spider pokemon_jp -MaxPages 1
+Assert-Call 7 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'pokemon_jp',
+    '-a', 'max_pages=1', '-O', 'data/pokemon_jp-sample.jsonl')
 $global:TestFailDocker = $true
 $failed = $false
 try { & $wrapper check }
 catch { $failed = $true }
-if (-not $failed -or $global:TestDockerCalls.Count -ne 6) { throw 'Docker failures must stop immediately' }
+if (-not $failed -or $global:TestDockerCalls.Count -ne 9) { throw 'Docker failures must stop immediately' }
 $global:LASTEXITCODE = 0
 Write-Output 'PowerShell command tests passed.'

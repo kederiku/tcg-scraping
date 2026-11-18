@@ -5,13 +5,15 @@ SPIDER ?= quotes
 MAX_PAGES ?= 3
 ARGS ?=
 
-.PHONY: help build list crawl crawl-js test lint format shell check
+.PHONY: help build list crawl crawl-js pokemon pokemon-all test lint format shell check
 
 help:
 	@echo "make build      - Construire l'image et installer Chromium"
 	@echo "make list       - Lister les spiders"
 	@echo "make crawl      - Exemple HTTP vers data/quotes.jsonl"
 	@echo "make crawl-js   - Exemple JavaScript vers data/quotes-js.jsonl"
+	@echo "make pokemon    - Echantillon Pokemon japonais (MAX_PAGES=3)"
+	@echo "make pokemon-all - Catalogue Pokemon complet, avec reprise"
 	@echo "make test       - Tests locaux HTTP et Chromium"
 	@echo "make lint       - Ruff et verification du format"
 	@echo "make format     - Formater le code Python"
@@ -26,10 +28,16 @@ list:
 	$(RUN) scrapy list
 
 crawl:
-	$(RUN) scrapy crawl $(SPIDER) -a max_pages=$(MAX_PAGES) -O data/$(SPIDER).jsonl $(ARGS)
+	$(RUN) scrapy crawl $(SPIDER) -a max_pages=$(MAX_PAGES) -O $(if $(filter pokemon_jp,$(SPIDER)),data/pokemon_jp-sample.jsonl,data/$(SPIDER).jsonl) $(ARGS)
 
 crawl-js:
 	$(RUN) scrapy crawl $(SPIDER) -a javascript=true -a max_pages=$(MAX_PAGES) -O data/$(SPIDER)-js.jsonl $(ARGS)
+
+pokemon:
+	$(RUN) scrapy crawl pokemon_jp -a max_pages=$(MAX_PAGES) -O data/pokemon_jp-sample.jsonl $(ARGS)
+
+pokemon-all:
+	$(RUN) scrapy crawl pokemon_jp -a max_pages=0 -s JOBDIR=data/jobs/pokemon_jp -o data/pokemon_jp.jsonl $(ARGS)
 
 test:
 	$(RUN) pytest -q

@@ -53,3 +53,29 @@ temporaires. Ces dossiers sont désormais explicitement exclus du lint et de Git
 
 Le build Linux et l'exécution du conteneur sont validés par la CI ci-dessus.
 Le lancement sur ce PC Windows reste à effectuer après son redémarrage.
+
+## Ajout ItemPokemon et spider pokemon_jp
+
+Vérifications locales de la modification non publiée :
+
+- `ItemPokemon` : 6 tests de schéma et de sérialisation.
+- Spider japonais : 27 contrats unitaires et 7 tests de crawl local, dont pagination,
+  doublons, limites, erreurs 429/JSON, arrêt sur erreur de parsing et deux reprises
+  JOBDIR réelles. Les 13 tests HTTP/Chromium précédents passent également.
+- Vérification complète avant commit : **53 tests réussis en 148,76 s**,
+  après correction de l'assertion du test d'erreur injectée pour attendre le
+  code de sortie non nul de Scrapy.
+- `ruff check .`, `ruff format --check .` et tests PowerShell : succès.
+- Revue indépendante : cinq défauts reproduits et corrigés (pagination, protection
+  de l'export, budget de reprise, provenance promotionnelle, commentaires HTML).
+- Essais réels bornés : trois cartes de la première page, puis trois cartes de
+  la deuxième page avec la version corrigée. Chaque essai utilise cinq requêtes
+  (robots.txt, liste, trois fiches) ; illustrateurs et URLs d'images contrôlés.
+  La dernière exécution se termine avec `finished` en 23,83 secondes.
+- Parsing local de cinq fiches officielles préalablement consultées : Pokémon,
+  Méga Pokémon avec talent, Dresseur, Énergie de base et Énergie spéciale.
+
+Le catalogue complet n'a pas été collecté. Aucune image n'a été téléchargée.
+Docker Desktop retourne toujours `Docker Desktop is unable to start` sur ce PC :
+la validation ci-dessus utilise Python/Chromium locaux. La CI Linux citée plus
+haut valide le socle initial, pas encore cette modification.
