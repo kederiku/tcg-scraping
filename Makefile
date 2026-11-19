@@ -6,7 +6,7 @@ MAX_PAGES ?= 3
 MAX_CARDS ?= 5
 ARGS ?=
 
-.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all one-piece one-piece-fr test lint format shell check
+.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all one-piece one-piece-fr magic magic-all test lint format shell check
 
 help:
 	@echo "make build      - Construire l'image et installer Chromium"
@@ -21,6 +21,8 @@ help:
 	@echo "make pokemon-id-all - Catalogue indonesien complet, avec reprise"
 	@echo "make one-piece  - Catalogue japonais One Piece vers data/one_piece_jp.jsonl"
 	@echo "make one-piece-fr - Catalogue francais One Piece vers data/one_piece_fr.jsonl"
+	@echo "make magic      - Echantillon Magic Scryfall (MAX_CARDS=5)"
+	@echo "make magic-all  - Catalogue Magic Scryfall complet vers data/magic_scryfall.jsonl"
 	@echo "make test       - Tests locaux HTTP et Chromium"
 	@echo "make lint       - Ruff et verification du format"
 	@echo "make format     - Formater le code Python"
@@ -34,11 +36,18 @@ build:
 list:
 	$(RUN) scrapy list
 
+ifeq ($(SPIDER),magic_scryfall)
+crawl: magic
+
+crawl-js:
+	$(error Utilisez make crawl SPIDER=magic_scryfall pour ce spider HTTP)
+else
 crawl:
 	$(RUN) scrapy crawl $(SPIDER) -a $(if $(filter pokemon_id,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O $(if $(filter pokemon_jp pokemon_kr pokemon_id,$(SPIDER)),data/$(SPIDER)-sample.jsonl,data/$(SPIDER).jsonl) $(ARGS)
 
 crawl-js:
 	$(RUN) scrapy crawl $(SPIDER) -a javascript=true -a $(if $(filter pokemon_id,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O data/$(SPIDER)-js.jsonl $(ARGS)
+endif
 
 pokemon:
 	$(RUN) scrapy crawl pokemon_jp -a max_pages=$(MAX_PAGES) -O data/pokemon_jp-sample.jsonl $(ARGS)
@@ -63,6 +72,12 @@ one-piece:
 
 one-piece-fr:
 	$(RUN) scrapy crawl one_piece_fr $(ARGS)
+
+magic:
+	$(RUN) scrapy crawl magic_scryfall -a max_cards=$(MAX_CARDS) $(ARGS)
+
+magic-all:
+	$(RUN) scrapy crawl magic_scryfall $(ARGS)
 
 test:
 	$(RUN) pytest -q
