@@ -15,6 +15,15 @@ de TCG Collector à partir de ses sitemaps publics autorisés.
 Le modèle [`ItemPokemon`](docs/item-pokemon.md) sert aux
 spiders de cartes : Pokémon, Dresseurs et Énergies, caractéristiques d'impression,
 attaques, talents, variantes et formats anciens ou multiparties.
+Le modèle [`ItemOnePiece`](docs/item-one-piece.md) décrit les impressions du
+ONE PIECE CARD GAME, des Leaders bicolores aux DON!!, avec leurs effets,
+illustrations alternatives et rééditions.
+Le spider [`one_piece_jp`](docs/one-piece-jp.md) remplit cet item depuis le
+catalogue officiel japonais avec les informations de la fiche, ses Q&A et
+l’URL de son recto. À chaque lancement, il écrit `data/one_piece_jp.jsonl`.
+Le spider `one_piece_fr` utilise le même modèle pour le catalogue français.
+Il exporte chaque impression avec son texte français et l’URL officielle de
+son recto. Il suit les dates de sortie françaises et inclut les promotions sans date.
 
 ## Démarrer
 
@@ -69,6 +78,8 @@ make crawl ARGS='-s LOG_LEVEL=DEBUG'
 | `pokemon-kr-all` | Catalogue coréen complet, export cumulatif et reprise |
 | `pokemon-id` | Échantillon indonésien, 5 cartes par défaut |
 | `pokemon-id-all` | Catalogue indonésien complet, export cumulatif et reprise |
+| `one-piece` | Catalogue japonais One Piece dans `data/one_piece_jp.jsonl` |
+| `one-piece-fr` | Catalogue français One Piece dans `data/one_piece_fr.jsonl` |
 | `test` | Tester HTTP et Chromium sur un serveur local |
 | `lint` | Vérifier Ruff et le formatage |
 | `format` | Formater le Python |
@@ -83,6 +94,22 @@ docker compose run --rm crawler scrapy list
 docker compose run --rm crawler scrapy crawl quotes -a max_pages=3 -O data/quotes.jsonl
 docker compose run --rm crawler scrapy crawl quotes -a javascript=true -O data/quotes-js.jsonl
 docker compose run --rm crawler pytest -q
+```
+
+## Cartes One Piece françaises
+
+Depuis la racine du projet, lance le catalogue complet avec Docker Compose.
+Chaque lancement remplace `data/one_piece_fr.jsonl`, avec une ligne par impression.
+
+```sh
+docker compose run --rm crawler scrapy crawl one_piece_fr
+```
+
+Pour essayer une seule série, utilise le numéro du paramètre `series` de l’URL
+Bandai. Par exemple, cette commande exporte le deck ST-15 dans un fichier séparé.
+
+```sh
+docker compose run --rm crawler scrapy crawl one_piece_fr -a series=622015 -O data/one_piece_fr_st15.jsonl
 ```
 
 ## Cartes Pokémon japonaises
@@ -189,6 +216,7 @@ personne n'est exigée. Les contrôles s'exécutent aussi pour les changements l
 ```text
 tcg_scraper/settings.py       Réglages et intégration Playwright
 tcg_scraper/item_pokemon.py   Schéma des caractéristiques de cartes Pokémon
+tcg_scraper/item_one_piece.py Schéma des caractéristiques de cartes One Piece
 tcg_scraper/middlewares.py    Identité HTTP, cache, arrêt sur blocage
 tcg_scraper/spiders/quotes.py Exemple et pagination
 tcg_scraper/spiders/pokemon_jp.py Catalogue Pokémon japonais et fiches

@@ -1,6 +1,6 @@
 param(
     [ValidateSet('help', 'build', 'list', 'crawl', 'crawl-js', 'pokemon', 'pokemon-all',
-        'pokemon-kr', 'pokemon-kr-all', 'pokemon-id', 'pokemon-id-all',
+        'pokemon-kr', 'pokemon-kr-all', 'pokemon-id', 'pokemon-id-all', 'one-piece', 'one-piece-fr',
         'test', 'lint', 'format', 'shell', 'check')]
     [string]$Target = 'help',
     [string]$Spider = 'quotes',
@@ -40,6 +40,8 @@ try {
             Write-Output '.\make.ps1 pokemon-kr-all  # Catalogue coreen complet, avec reprise'
             Write-Output '.\make.ps1 pokemon-id -MaxCards 5'
             Write-Output '.\make.ps1 pokemon-id-all  # Catalogue indonesien complet, avec reprise'
+            Write-Output '.\make.ps1 one-piece  # Catalogue japonais vers data/one_piece_jp.jsonl'
+            Write-Output '.\make.ps1 one-piece-fr  # Catalogue francais vers data/one_piece_fr.jsonl'
         }
         'build' { Invoke-Docker @('compose', 'build', '--pull') }
         'list' { Invoke-Docker ($run + @('scrapy', 'list')) }
@@ -77,6 +79,8 @@ try {
             Invoke-Docker ($run + @('scrapy', 'crawl', 'pokemon_id', '-a', 'max_cards=0',
                 '-s', 'JOBDIR=data/jobs/pokemon_id', '-o', 'data/pokemon_id.jsonl') + $ExtraArgs)
         }
+        'one-piece' { Invoke-Docker ($run + @('scrapy', 'crawl', 'one_piece_jp') + $ExtraArgs) }
+        'one-piece-fr' { Invoke-Docker ($run + @('scrapy', 'crawl', 'one_piece_fr') + $ExtraArgs) }
         'test' { Invoke-Docker ($run + @('pytest', '-q')) }
         'lint' { Invoke-Lint }
         'format' { Invoke-Docker ($run + @('ruff', 'format', '.')) }

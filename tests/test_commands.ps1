@@ -61,5 +61,11 @@ $failed = $false
 try { & $wrapper check }
 catch { $failed = $true }
 if (-not $failed -or $global:TestDockerCalls.Count -ne 17) { throw 'Docker failures must stop immediately' }
+$global:TestFailDocker = $false
+& $wrapper one-piece
+Assert-Call 17 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'one_piece_jp')
+& $wrapper one-piece-fr -ExtraArgs @('-a', 'series=622015')
+Assert-Call 18 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'one_piece_fr',
+    '-a', 'series=622015')
 $global:LASTEXITCODE = 0
 Write-Output 'PowerShell command tests passed.'
