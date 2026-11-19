@@ -6,7 +6,7 @@ MAX_PAGES ?= 3
 MAX_CARDS ?= 5
 ARGS ?=
 
-.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all test lint format shell check
+.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all one-piece one-piece-fr test lint format shell check
 
 help:
 	@echo "make build      - Construire l'image et installer Chromium"
@@ -19,6 +19,8 @@ help:
 	@echo "make pokemon-kr-all - Catalogue coreen complet, avec reprise"
 	@echo "make pokemon-id - Echantillon indonesien (MAX_CARDS=5)"
 	@echo "make pokemon-id-all - Catalogue indonesien complet, avec reprise"
+	@echo "make one-piece  - Catalogue japonais One Piece vers data/one_piece_jp.jsonl"
+	@echo "make one-piece-fr - Catalogue francais One Piece vers data/one_piece_fr.jsonl"
 	@echo "make test       - Tests locaux HTTP et Chromium"
 	@echo "make lint       - Ruff et verification du format"
 	@echo "make format     - Formater le code Python"
@@ -55,6 +57,12 @@ pokemon-id:
 
 pokemon-id-all:
 	$(RUN) scrapy crawl pokemon_id -a max_cards=0 -s JOBDIR=data/jobs/pokemon_id -o data/pokemon_id.jsonl $(ARGS)
+
+one-piece:
+	$(RUN) scrapy crawl one_piece_jp $(ARGS)
+
+one-piece-fr:
+	$(RUN) scrapy crawl one_piece_fr $(ARGS)
 
 test:
 	$(RUN) pytest -q
