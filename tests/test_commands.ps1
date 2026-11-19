@@ -67,5 +67,22 @@ Assert-Call 17 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'one_pi
 & $wrapper one-piece-fr -ExtraArgs @('-a', 'series=622015')
 Assert-Call 18 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'one_piece_fr',
     '-a', 'series=622015')
+& $wrapper magic-all
+Assert-Call 19 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'magic_scryfall')
+& $wrapper magic -ExtraArgs @('-s', 'LOG_LEVEL=DEBUG')
+Assert-Call 20 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'magic_scryfall',
+    '-a', 'max_cards=5', '-s', 'LOG_LEVEL=DEBUG')
+& $wrapper crawl -Spider magic_scryfall -MaxCards 2 -ExtraArgs @('-O', 'data/custom.jsonl')
+Assert-Call 21 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'magic_scryfall',
+    '-a', 'max_cards=2', '-O', 'data/custom.jsonl')
+& $wrapper crawl -Spider magic_scryfall
+Assert-Call 22 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'magic_scryfall',
+    '-a', 'max_cards=5')
+$failed = $false
+try { & $wrapper crawl-js -Spider magic_scryfall }
+catch { $failed = $_.Exception.Message -like '*crawl*magic_scryfall*' }
+if (-not $failed -or $global:TestDockerCalls.Count -ne 23) {
+    throw 'Magic must reject crawl-js before calling Docker and point to the HTTP command'
+}
 $global:LASTEXITCODE = 0
 Write-Output 'PowerShell command tests passed.'

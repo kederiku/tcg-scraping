@@ -25,6 +25,12 @@ Le spider `one_piece_fr` utilise le même modèle pour le catalogue français.
 Il exporte chaque impression avec son texte français et l’URL officielle de
 son recto. Il suit les dates de sortie françaises et inclut les promotions sans date.
 
+Le modèle [`ItemMagic`](docs/item-magic.md) décrit les cartes Magic depuis Alpha.
+Il conserve le texte imprimé et le texte Oracle, les variantes d'une même carte,
+les caractéristiques de chaque face et les cartes liées, comme les jetons.
+Le [spider Magic Scryfall](docs/magic-scryfall.md) remplit cet item depuis les exports
+officiels de Scryfall pour toutes les éditions et langues répertoriées.
+
 ## Démarrer
 
 Prérequis : Docker Engine avec Docker Compose, ou Docker Desktop configuré
@@ -80,6 +86,8 @@ make crawl ARGS='-s LOG_LEVEL=DEBUG'
 | `pokemon-id-all` | Catalogue indonésien complet, export cumulatif et reprise |
 | `one-piece` | Catalogue japonais One Piece dans `data/one_piece_jp.jsonl` |
 | `one-piece-fr` | Catalogue français One Piece dans `data/one_piece_fr.jsonl` |
+| `magic` | Échantillon Scryfall, 5 impressions par défaut |
+| `magic-all` | Catalogue Scryfall multilingue dans `data/magic_scryfall.jsonl` |
 | `test` | Tester HTTP et Chromium sur un serveur local |
 | `lint` | Vérifier Ruff et le formatage |
 | `format` | Formater le Python |
@@ -217,6 +225,7 @@ personne n'est exigée. Les contrôles s'exécutent aussi pour les changements l
 tcg_scraper/settings.py       Réglages et intégration Playwright
 tcg_scraper/item_pokemon.py   Schéma des caractéristiques de cartes Pokémon
 tcg_scraper/item_one_piece.py Schéma des caractéristiques de cartes One Piece
+tcg_scraper/item_magic.py     Schéma des impressions et des faces de cartes Magic
 tcg_scraper/middlewares.py    Identité HTTP, cache, arrêt sur blocage
 tcg_scraper/spiders/quotes.py Exemple et pagination
 tcg_scraper/spiders/pokemon_jp.py Catalogue Pokémon japonais et fiches
