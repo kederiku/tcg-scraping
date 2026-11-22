@@ -11,6 +11,8 @@ Le spider [`pokemon_kr`](docs/pokemon-kr.md) fait de même pour le catalogue cor
 en reproduisant les requêtes Recherche et « Charger plus » du site.
 Le spider [`pokemon_id`](docs/pokemon-id.md) collecte les fiches indonésiennes
 de TCG Collector à partir de ses sitemaps publics autorisés.
+Le spider `pokemon_fr` découvre les extensions dans les filtres de l’encyclopédie
+française de Pokémon.com et ouvre chaque fiche de carte.
 
 Le modèle [`ItemPokemon`](docs/item-pokemon.md) sert aux
 spiders de cartes : Pokémon, Dresseurs et Énergies, caractéristiques d'impression,
@@ -84,6 +86,8 @@ make crawl ARGS='-s LOG_LEVEL=DEBUG'
 | `pokemon-kr-all` | Catalogue coréen complet, export cumulatif et reprise |
 | `pokemon-id` | Échantillon indonésien, 5 cartes par défaut |
 | `pokemon-id-all` | Catalogue indonésien complet, export cumulatif et reprise |
+| `pokemon-fr` | Échantillon français, 5 fiches par défaut |
+| `pokemon-fr-all` | Toutes les extensions de l’encyclopédie française dans `data/pokemon_fr.jsonl` |
 | `one-piece` | Catalogue japonais One Piece dans `data/one_piece_jp.jsonl` |
 | `one-piece-fr` | Catalogue français One Piece dans `data/one_piece_fr.jsonl` |
 | `magic` | Échantillon Scryfall, 5 impressions par défaut |
@@ -119,6 +123,64 @@ Bandai. Par exemple, cette commande exporte le deck ST-15 dans un fichier sépar
 ```sh
 docker compose run --rm crawler scrapy crawl one_piece_fr -a series=622015 -O data/one_piece_fr_st15.jsonl
 ```
+
+## Cartes Pokémon françaises
+
+Pour parcourir toutes les extensions de l’[encyclopédie officielle](https://www.pokemon.com/fr/jcc-pokemon/cartes-pokemon),
+lance cette commande depuis la racine du projet avec Docker démarré.
+
+```powershell
+.\make.ps1 pokemon-fr-all
+```
+
+L’équivalent direct est `docker compose run --rm crawler scrapy crawl pokemon_fr`.
+Le spider suit les filtres d’extension, y compris les promotions et sous-collections
+qui ont leur propre filtre. Il avance avec « Résultats suivants » et exporte une
+ligne JSON par fiche dans `data/pokemon_fr.jsonl`. La première carte d’un nouveau
+lancement remplace le contenu précédent de ce fichier.
+
+Pour essayer cinq fiches de *Dragons Exaltés* dans `data/pokemon_fr-sample.jsonl` :
+
+```powershell
+.\make.ps1 pokemon-fr -MaxCards 5 -ExtraArgs @('-a', 'extension=bw6')
+```
+
+Le paramètre facultatif `extension` correspond au code du filtre dans l’URL de
+recherche, par exemple `bw6` dans `?bw6=on`. L’export conserve le nom de l’extension
+et de la série, le numéro imprimé, la rareté, l’illustrateur, l’URL du recto et celle
+de la fiche. Selon la carte, il contient aussi les PV, le stade, l’évolution, les
+types, les attaques et leurs coûts, les talents, faiblesses, résistances, le coût
+de retraite, les règles et les textes des cartes Dresseur ou Énergie.
+
+En cas de CAPTCHA, Scrapy termine avec `blocked_captcha`. Un export commencé
+avant ce blocage contient uniquement les fiches déjà reçues.
+
+### Compléter la collection avec les archives de Pokémon.com
+
+Le spider `pokemon_fr_archives` lit les copies historiques de l’encyclopédie
+française dans la Wayback Machine. Cette commande ajoute les cartes manquantes
+à une collection locale. Relancer la même commande reprend à partir des
+identifiants présents dans le JSONL et conserve les fiches déjà enregistrées.
+
+```powershell
+docker compose run --rm crawler scrapy crawl pokemon_fr_archives -o data/pokemon_fr_collection.jsonl
+```
+
+Pour compléter un export direct existant, indique son chemin après `-o`.
+Utilise un seul processus par fichier. L’option `-O` demande un nouvel export
+et remplace le fichier. Pour essayer dix fiches d’une seule extension :
+
+```powershell
+docker compose run --rm crawler scrapy crawl pokemon_fr_archives -a extension=bw6 -a max_cards=10
+```
+
+Chaque ligne porte l’URL Pokémon.com dans `source_url`. Une fiche archivée
+porte aussi l’URL de la capture et son horodatage UTC (`YYYYMMDDhhmmss`)
+dans `additional_attributes.archive`. Le spider essaie les captures de la
+plus récente à la plus ancienne jusqu’à retrouver la bonne fiche. Certaines
+cartes ou extensions manquent dans l’archive, et certaines captures ne
+contiennent qu’une page de blocage. Les statistiques Scrapy comptent les
+fiches indexées, déjà exportées et illisibles.
 
 ## Cartes Pokémon japonaises
 

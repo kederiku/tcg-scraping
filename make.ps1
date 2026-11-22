@@ -1,7 +1,7 @@
 param(
     [ValidateSet('help', 'build', 'list', 'crawl', 'crawl-js', 'pokemon', 'pokemon-all',
         'pokemon-kr', 'pokemon-kr-all', 'pokemon-id', 'pokemon-id-all', 'one-piece', 'one-piece-fr',
-        'magic', 'magic-all', 'test', 'lint', 'format', 'shell', 'check')]
+        'pokemon-fr', 'pokemon-fr-all', 'magic', 'magic-all', 'test', 'lint', 'format', 'shell', 'check')]
     [string]$Target = 'help',
     [string]$Spider = 'quotes',
     [ValidateRange(1, 2147483647)]
@@ -28,7 +28,7 @@ function Invoke-Lint {
 Push-Location $PSScriptRoot
 try {
     $run = @('compose', 'run', '--rm', 'crawler')
-    $limit = if ($Spider -in @('pokemon_id', 'magic_scryfall')) { "max_cards=$MaxCards" } else { "max_pages=$MaxPages" }
+    $limit = if ($Spider -in @('pokemon_id', 'pokemon_fr', 'magic_scryfall')) { "max_cards=$MaxCards" } else { "max_pages=$MaxPages" }
     switch ($Target) {
         'help' {
             Write-Output '.\make.ps1 build | list | crawl | crawl-js | test | lint | format | shell | check'
@@ -40,6 +40,8 @@ try {
             Write-Output '.\make.ps1 pokemon-kr-all  # Catalogue coreen complet, avec reprise'
             Write-Output '.\make.ps1 pokemon-id -MaxCards 5'
             Write-Output '.\make.ps1 pokemon-id-all  # Catalogue indonesien complet, avec reprise'
+            Write-Output '.\make.ps1 pokemon-fr -MaxCards 5'
+            Write-Output '.\make.ps1 pokemon-fr-all  # Toutes les extensions francaises'
             Write-Output '.\make.ps1 one-piece  # Catalogue japonais vers data/one_piece_jp.jsonl'
             Write-Output '.\make.ps1 one-piece-fr  # Catalogue francais vers data/one_piece_fr.jsonl'
             Write-Output '.\make.ps1 magic -MaxCards 5'
@@ -50,7 +52,7 @@ try {
         'crawl' {
             $crawlArgs = @('scrapy', 'crawl', $Spider, '-a', $limit)
             if ($Spider -ne 'magic_scryfall') {
-                $output = if ($Spider -in @('pokemon_jp', 'pokemon_kr', 'pokemon_id')) { "data/$Spider-sample.jsonl" }
+                $output = if ($Spider -in @('pokemon_jp', 'pokemon_kr', 'pokemon_id', 'pokemon_fr')) { "data/$Spider-sample.jsonl" }
                     else { "data/$Spider.jsonl" }
                 $crawlArgs += @('-O', $output)
             }
@@ -88,6 +90,11 @@ try {
                 '-s', 'JOBDIR=data/jobs/pokemon_id', '-o', 'data/pokemon_id.jsonl') + $ExtraArgs)
         }
         'one-piece' { Invoke-Docker ($run + @('scrapy', 'crawl', 'one_piece_jp') + $ExtraArgs) }
+        'pokemon-fr' {
+            Invoke-Docker ($run + @('scrapy', 'crawl', 'pokemon_fr', '-a', "max_cards=$MaxCards",
+                '-O', 'data/pokemon_fr-sample.jsonl') + $ExtraArgs)
+        }
+        'pokemon-fr-all' { Invoke-Docker ($run + @('scrapy', 'crawl', 'pokemon_fr') + $ExtraArgs) }
         'one-piece-fr' { Invoke-Docker ($run + @('scrapy', 'crawl', 'one_piece_fr') + $ExtraArgs) }
         'magic' {
             Invoke-Docker ($run + @('scrapy', 'crawl', 'magic_scryfall', '-a', "max_cards=$MaxCards") + $ExtraArgs)
