@@ -84,5 +84,10 @@ catch { $failed = $_.Exception.Message -like '*crawl*magic_scryfall*' }
 if (-not $failed -or $global:TestDockerCalls.Count -ne 23) {
     throw 'Magic must reject crawl-js before calling Docker and point to the HTTP command'
 }
+& $wrapper pokemon-fr -MaxCards 2 -ExtraArgs @('-a', 'extension=bw6')
+Assert-Call 23 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'pokemon_fr',
+    '-a', 'max_cards=2', '-O', 'data/pokemon_fr-sample.jsonl', '-a', 'extension=bw6')
+& $wrapper pokemon-fr-all
+Assert-Call 24 @('compose', 'run', '--rm', 'crawler', 'scrapy', 'crawl', 'pokemon_fr')
 $global:LASTEXITCODE = 0
 Write-Output 'PowerShell command tests passed.'

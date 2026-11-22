@@ -6,7 +6,7 @@ MAX_PAGES ?= 3
 MAX_CARDS ?= 5
 ARGS ?=
 
-.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all one-piece one-piece-fr magic magic-all test lint format shell check
+.PHONY: help build list crawl crawl-js pokemon pokemon-all pokemon-kr pokemon-kr-all pokemon-id pokemon-id-all pokemon-fr pokemon-fr-all one-piece one-piece-fr magic magic-all test lint format shell check
 
 help:
 	@echo "make build      - Construire l'image et installer Chromium"
@@ -19,6 +19,8 @@ help:
 	@echo "make pokemon-kr-all - Catalogue coreen complet, avec reprise"
 	@echo "make pokemon-id - Echantillon indonesien (MAX_CARDS=5)"
 	@echo "make pokemon-id-all - Catalogue indonesien complet, avec reprise"
+	@echo "make pokemon-fr - Echantillon Pokemon francais (MAX_CARDS=5)"
+	@echo "make pokemon-fr-all - Toutes les extensions de l'encyclopedie francaise"
 	@echo "make one-piece  - Catalogue japonais One Piece vers data/one_piece_jp.jsonl"
 	@echo "make one-piece-fr - Catalogue francais One Piece vers data/one_piece_fr.jsonl"
 	@echo "make magic      - Echantillon Magic Scryfall (MAX_CARDS=5)"
@@ -43,7 +45,7 @@ crawl-js:
 	$(error Utilisez make crawl SPIDER=magic_scryfall pour ce spider HTTP)
 else
 crawl:
-	$(RUN) scrapy crawl $(SPIDER) -a $(if $(filter pokemon_id,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O $(if $(filter pokemon_jp pokemon_kr pokemon_id,$(SPIDER)),data/$(SPIDER)-sample.jsonl,data/$(SPIDER).jsonl) $(ARGS)
+	$(RUN) scrapy crawl $(SPIDER) -a $(if $(filter pokemon_id pokemon_fr,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O $(if $(filter pokemon_jp pokemon_kr pokemon_id pokemon_fr,$(SPIDER)),data/$(SPIDER)-sample.jsonl,data/$(SPIDER).jsonl) $(ARGS)
 
 crawl-js:
 	$(RUN) scrapy crawl $(SPIDER) -a javascript=true -a $(if $(filter pokemon_id,$(SPIDER)),max_cards=$(MAX_CARDS),max_pages=$(MAX_PAGES)) -O data/$(SPIDER)-js.jsonl $(ARGS)
@@ -66,6 +68,12 @@ pokemon-id:
 
 pokemon-id-all:
 	$(RUN) scrapy crawl pokemon_id -a max_cards=0 -s JOBDIR=data/jobs/pokemon_id -o data/pokemon_id.jsonl $(ARGS)
+
+pokemon-fr:
+	$(RUN) scrapy crawl pokemon_fr -a max_cards=$(MAX_CARDS) -O data/pokemon_fr-sample.jsonl $(ARGS)
+
+pokemon-fr-all:
+	$(RUN) scrapy crawl pokemon_fr $(ARGS)
 
 one-piece:
 	$(RUN) scrapy crawl one_piece_jp $(ARGS)
